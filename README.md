@@ -4,9 +4,7 @@
 
 **A music theory trainer for intervals, notes, and tones.**
 
-`D – E – A – D – Bm – E – E – F#m`
-
-[Features](#features) · [Getting started](#getting-started) · [Roadmap](#roadmap) · [The name](#the-name) · [Contributing](#contributing) · [License](#license)
+[Features](#features) · [Getting started](#getting-started) · [Roadmap](#roadmap) · [Contributing](#contributing) · [License](#license)
 
 </div>
 
@@ -114,21 +112,6 @@ deadbeef-sharp/
 | **Later** | Ear training for intervals and scales | Exploring |
 
 See the [issue tracker](../../issues) for detailed tasks.
-
-## The name
-
-`0xDEADBEEF` is a classic hex "magic number" that programmers use to mark uninitialized or freed memory.
-Read as chord symbols, its letters also form a real progression. Add one sharp and you get:
-
-| Chord | D | E | A | D | Bm | E | E | **F#m** |
-|---|---|---|---|---|---|---|---|---|
-| A major | IV | V | I | IV | ii | V | V | **vi** |
-
-It ends on a **deceptive cadence**: the E (V) sets up a resolution to A (I), but the progression
-moves to F#m (vi) instead.
-
-Without the sharp, plain DEADBEEF works too, as a darker progression in A minor:
-`Dm E Am Dm B° E E F` (iv V i iv ii° V V VI).
 
 ## Contributing
 
