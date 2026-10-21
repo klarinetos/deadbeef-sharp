@@ -1,0 +1,36 @@
+Copyright (c) 2026 Klarinetos Plokamias. All rights reserved.
+
+This repository is public so that people can read the code, use the app, and
+contribute to it. It is not open source.
+
+YOU MAY
+
+  - View and study the source code.
+  - Download, build, and run the app for your own personal, non-commercial use.
+  - Fork this repository on GitHub, solely to prepare contributions to it
+    through pull requests.
+
+YOU MAY NOT, without prior written permission from the copyright holder
+
+  - Publish, distribute, sublicense, or sell the app or any part of the source
+    code, including through app stores or websites.
+  - Release modified versions of the app, or use the source code in other
+    projects.
+
+CONTRIBUTIONS
+
+By submitting a pull request or any other contribution to this repository, you
+grant the copyright holder a perpetual, worldwide, non-exclusive, irrevocable,
+royalty-free license to use, copy, modify, distribute, sublicense, and relicense
+your contribution as part of this project, and you confirm that you have the
+right to grant this license.
+
+NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

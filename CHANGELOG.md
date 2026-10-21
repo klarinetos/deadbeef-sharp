@@ -1,0 +1,28 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- Options for each question type, behind a gear button on its card:
+  - Find the note and Name the interval: choose which intervals to practice.
+  - Notes to tones and Interval to tones: choose the range (within an octave, up to a 13th, or within
+    two octaves) and which interval numbers to use (all, odd only, or even only).
+- Compound intervals (9ths to 14ths) for tone questions, with octave numbers on the notes.
+- Four question types: find the note, name the interval, notes to tones, and interval to tones.
+- Session options: question types, order (round robin, random, or custom odds), length (including
+  unlimited), note names (letters, solfège, or both), and accidentals (sharps, flats, both, or random).
+- Results screen with score, accuracy per question type, and missed questions.
+- Settings are saved in the browser between visits.
+- Light and dark themes, and a layout that works on phones.
+- Unit tests for the theory and quiz logic.
+- Initial repository structure, README, license, and contribution guidelines.
+
+### Removed
+
+- The octave is no longer asked about in any question type.
