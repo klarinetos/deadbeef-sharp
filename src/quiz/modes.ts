@@ -27,6 +27,11 @@ export const MODES: readonly Mode[] = [
     title: 'Interval to tones',
     description: 'Given an interval, say how many tones it spans.',
   },
+  {
+    id: 'degreeToChord',
+    title: 'Degree to chord',
+    description: 'Given a key and a degree, such as the dominant of D major, name the chord.',
+  },
 ];
 
 export const MODE_IDS: readonly ModeId[] = MODES.map((mode) => mode.id);

@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Degree to chord question type: given a key and a scale degree (tonic, supertonic, and so on), name the
+  chord's root, quality, and optionally the quality of its 7th, all on one screen. Options for major or
+  minor keys, harmonic or natural minor, triads or seventh chords, and which degrees to practice.
 - Options for each question type, behind a gear button on its card:
   - Find the note and Name the interval: choose which intervals to practice.
   - Notes to tones and Interval to tones: choose the range (within an octave, up to a 13th, or within

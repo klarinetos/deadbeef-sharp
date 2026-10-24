@@ -1,19 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
 import { createModePicker, type ModePicker } from '../quiz/picker';
 import { makeFreshQuestion } from '../quiz/questions';
-import type { AnswerRecord, Choice, Question, Settings } from '../quiz/types';
+import type { AnswerPart, AnswerRecord, Choice, Question, Settings } from '../quiz/types';
 
 interface QuizScreenProps {
   settings: Settings;
   onFinish: (records: AnswerRecord[]) => void;
 }
 
+/** The chosen choice key for each answer part, by part id. */
+type Selections = Record<string, string>;
+
 interface QuizState {
   pick: ModePicker;
   question: Question;
   number: number;
   records: AnswerRecord[];
-  chosenKey: string | null;
+  selections: Selections;
+  checked: boolean;
+}
+
+function choiceLabel(part: AnswerPart, key: string): string {
+  const choice = part.choices.find((candidate) => candidate.key === key);
+  return choice ? (choice.longLabel ?? choice.label) : key;
 }
 
 export function QuizScreen({ settings, onFinish }: QuizScreenProps) {
@@ -25,32 +34,41 @@ export function QuizScreen({ settings, onFinish }: QuizScreenProps) {
       question: makeFreshQuestion(pick(), settings, Math.random, null),
       number: 1,
       records: [],
-      chosenKey: null,
+      selections: {},
+      checked: false,
     };
   });
-  const { question, number, records, chosenKey } = state;
+  const { question, number, records, selections, checked } = state;
 
   const total = settings.count === 'infinite' ? null : settings.count;
-  const answered = chosenKey !== null;
+  const multiPart = question.parts.length > 1;
+  const complete = question.parts.every((part) => part.id in selections);
   const lastRecord = records[records.length - 1];
   const isLast = total !== null && number >= total;
   const score = records.filter((record) => record.correct).length;
 
   const nextButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (answered) nextButton.current?.focus();
-  }, [answered]);
+    if (checked) nextButton.current?.focus();
+  }, [checked]);
 
-  function choose(choice: Choice) {
-    if (answered) return;
+  function check(chosen: Selections) {
     const record: AnswerRecord = {
       modeId: question.modeId,
       text: question.text,
-      given: choice.longLabel ?? choice.label,
+      given: question.parts.map((part) => choiceLabel(part, chosen[part.id])).join(', '),
       answer: question.answerLabel,
-      correct: choice.key === question.answerKey,
+      correct: question.parts.every((part) => chosen[part.id] === part.answerKey),
     };
-    setState({ ...state, chosenKey: choice.key, records: [...records, record] });
+    setState({ ...state, selections: chosen, checked: true, records: [...records, record] });
+  }
+
+  function choose(part: AnswerPart, choice: Choice) {
+    if (checked) return;
+    const chosen = { ...selections, [part.id]: choice.key };
+    // A single-part answer is checked straight away; multi-part answers wait for the Check button.
+    if (multiPart) setState({ ...state, selections: chosen });
+    else check(chosen);
   }
 
   function next() {
@@ -60,17 +78,18 @@ export function QuizScreen({ settings, onFinish }: QuizScreenProps) {
     }
     // Picking happens here, outside any state updater, so each call advances the picker exactly once.
     const nextQuestion = makeFreshQuestion(state.pick(), settings, Math.random, question.signature);
-    setState({ ...state, question: nextQuestion, number: number + 1, chosenKey: null });
+    setState({ ...state, question: nextQuestion, number: number + 1, selections: {}, checked: false });
   }
 
-  function choiceState(choice: Choice): string {
-    if (!answered) return '';
-    if (choice.key === question.answerKey) return 'is-correct';
-    if (choice.key === chosenKey) return 'is-wrong';
+  function choiceState(part: AnswerPart, choice: Choice): string {
+    const selected = selections[part.id] === choice.key;
+    if (!checked) return selected ? 'is-selected' : '';
+    if (choice.key === part.answerKey) return 'is-correct';
+    if (selected) return 'is-wrong';
     return 'is-dim';
   }
 
-  const completed = answered ? number : number - 1;
+  const completed = checked ? number : number - 1;
 
   return (
     <div className="quiz">
@@ -95,29 +114,45 @@ export function QuizScreen({ settings, onFinish }: QuizScreenProps) {
         <p className="prompt-hint">{question.hint}</p>
       </section>
 
-      <div className={`choices choices-${question.answerType}`} role="group" aria-label="Answers">
-        {question.choices.map((choice) => (
-          <button
-            key={choice.key}
-            type="button"
-            className={`choice ${choiceState(choice)}`}
-            aria-label={choice.longLabel ?? choice.label}
-            style={choice.row ? { gridRow: choice.row, gridColumn: choice.column } : undefined}
-            disabled={answered}
-            onClick={() => choose(choice)}
-          >
-            <span className="choice-label">{choice.label}</span>
-            {choice.detail && <span className="choice-detail">{choice.detail}</span>}
-          </button>
-        ))}
-      </div>
+      {question.parts.map((part) => (
+        <div className="answer-part" key={part.id}>
+          {multiPart && <h2 className="setting-label">{part.label}</h2>}
+          <div className={`choices choices-${part.layout}`} role="group" aria-label={part.label}>
+            {part.choices.map((choice) => (
+              <button
+                key={choice.key}
+                type="button"
+                className={`choice ${choiceState(part, choice)}`}
+                aria-label={choice.longLabel ?? choice.label}
+                aria-pressed={multiPart && !checked ? selections[part.id] === choice.key : undefined}
+                style={choice.row ? { gridRow: choice.row, gridColumn: choice.column } : undefined}
+                disabled={checked}
+                onClick={() => choose(part, choice)}
+              >
+                <span className="choice-label">{choice.label}</span>
+                {choice.detail && <span className="choice-detail">{choice.detail}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
 
       <div className="feedback-slot" aria-live="polite">
-        {answered && lastRecord && (
+        {!checked && multiPart && (
+          <div className="check-row">
+            <button type="button" className="button primary" disabled={!complete} onClick={() => check(selections)}>
+              Check
+            </button>
+            {!complete && <span className="setting-help">Pick an answer in each row.</span>}
+          </div>
+        )}
+        {checked && lastRecord && (
           <div className={`feedback ${lastRecord.correct ? 'is-correct' : 'is-wrong'}`}>
             <p className="feedback-text">
               {lastRecord.correct ? (
-                'Correct!'
+                <>
+                  Correct! <strong>{question.answerLabel}</strong>
+                </>
               ) : (
                 <>
                   Not quite. The answer is <strong>{question.answerLabel}</strong>.

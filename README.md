@@ -15,7 +15,7 @@
 ## About
 
 DEADBEEF♯ drills the fundamentals of music theory through quick questions. You're given notes, intervals,
-and tone counts, and you answer by tapping buttons. There's no sheet music to read and no audio to listen to:
+tone counts, and keys, and you answer by tapping buttons. There's no sheet music to read and no audio to listen to:
 the focus is on knowing the theory cold.
 
 It's meant for students preparing for theory exams, self-taught players filling in gaps, and anyone who wants
@@ -31,6 +31,7 @@ to spell intervals instantly instead of counting on their fingers.
 | **Name the interval** | Two notes, lower one first | The interval between them | E → B♭ → **d5** |
 | **Notes to tones** | Two notes, lower one first | How many tones apart they are | C → G → **3½ tones** |
 | **Interval to tones** | An interval | How many tones it spans | Minor 3rd → **1½ tones** |
+| **Degree to chord** | A key and a scale degree | The chord's root, quality, and optionally its 7th | Dominant of D major → **A, major, minor 7th (A7)** |
 
 Spelling matters. A major 3rd above E is G♯, not A♭, and C → F♯ (A4) is a different interval from
 C → G♭ (d5), even though both are 3 tones. Unisons and octaves are never asked; they're too easy.
@@ -45,10 +46,15 @@ Each question type has a gear button with its own options:
   - **Range:** within an octave, up to a 13th, or within two octaves. Past the octave, notes show
     octave numbers (C4 → E5) so the distance is unambiguous.
   - **Interval numbers:** all, odd only (3rds, 5ths, 7ths, 9ths…), or even only.
+- **Degree to chord:**
+  - **Keys:** major, minor, or both.
+  - **Minor scale:** harmonic minor (major dominant, leading tone) or natural minor (minor dominant, subtonic).
+  - **Chords:** triads (root and quality) or seventh chords (also the quality of the 7th).
+  - **Degrees:** tick which degrees to practice, from tonic to leading tone.
 
 ### Session options
 
-- **Question types:** practice any combination of the four.
+- **Question types:** practice any combination of the five.
 - **Order:** round robin, random with equal odds, or random with custom odds per type.
 - **Length:** 5, 10, 20, or 50 questions, or keep going until you stop.
 - **Note names:** letters (C D E), solfège (Do Re Mi), or a random mix.

@@ -1,8 +1,10 @@
 import { SIMPLE_INTERVALS } from '../theory/intervals';
-import { DEFAULT_MODE_OPTIONS, NUMBER_FILTERS, TONE_RANGES } from './modeOptions';
+import { DEGREES } from '../theory/keys';
+import { DEFAULT_MODE_OPTIONS, KEY_SETTINGS, MINOR_FORMS, NUMBER_FILTERS, TONE_RANGES } from './modeOptions';
 import { MODE_IDS } from './modes';
 import type {
   AccidentalSetting,
+  ChordOptions,
   IntervalOptions,
   ModeId,
   ModeOptions,
@@ -22,7 +24,7 @@ export const MAX_WEIGHT = 10;
 export const DEFAULT_SETTINGS: Settings = {
   modes: [...MODE_IDS],
   order: 'uniform',
-  weights: { findNote: 1, nameInterval: 1, notesToTones: 1, intervalToTones: 1 },
+  weights: { findNote: 1, nameInterval: 1, notesToTones: 1, intervalToTones: 1, degreeToChord: 1 },
   count: 10,
   naming: 'letters',
   accidentals: 'both',
@@ -55,6 +57,18 @@ function sanitizeToneOptions(raw: unknown, fallback: ToneOptions): ToneOptions {
   };
 }
 
+function sanitizeChordOptions(raw: unknown, fallback: ChordOptions): ChordOptions {
+  const input = asRecord(raw);
+  const stored = input.degrees;
+  const degrees = Array.isArray(stored) ? DEGREES.filter((degree) => stored.includes(degree)) : [];
+  return {
+    keys: oneOf(KEY_SETTINGS, input.keys, fallback.keys),
+    minorForm: oneOf(MINOR_FORMS, input.minorForm, fallback.minorForm),
+    sevenths: typeof input.sevenths === 'boolean' ? input.sevenths : fallback.sevenths,
+    degrees: degrees.length > 0 ? degrees : [...fallback.degrees],
+  };
+}
+
 function sanitizeModeOptions(raw: unknown): ModeOptions {
   const input = asRecord(raw);
   return {
@@ -62,6 +76,7 @@ function sanitizeModeOptions(raw: unknown): ModeOptions {
     nameInterval: sanitizeIntervalOptions(input.nameInterval, DEFAULT_MODE_OPTIONS.nameInterval),
     notesToTones: sanitizeToneOptions(input.notesToTones, DEFAULT_MODE_OPTIONS.notesToTones),
     intervalToTones: sanitizeToneOptions(input.intervalToTones, DEFAULT_MODE_OPTIONS.intervalToTones),
+    degreeToChord: sanitizeChordOptions(input.degreeToChord, DEFAULT_MODE_OPTIONS.degreeToChord),
   };
 }
 

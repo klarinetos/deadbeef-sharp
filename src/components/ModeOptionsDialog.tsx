@@ -1,6 +1,8 @@
 import { useEffect, useId, useRef } from 'react';
 import { SIMPLE_INTERVALS } from '../theory/intervals';
+import { DEGREES, type MinorForm } from '../theory/keys';
 import {
+  DEGREE_LABELS,
   NUMBER_LABELS,
   NUMBER_FILTERS,
   RANGE_LABELS,
@@ -10,7 +12,16 @@ import {
   toneIntervals,
 } from '../quiz/modeOptions';
 import { modeTitle } from '../quiz/modes';
-import type { IntervalOptions, ModeId, ModeOptions, NumberFilter, ToneOptions, ToneRange } from '../quiz/types';
+import type {
+  ChordOptions,
+  IntervalOptions,
+  KeySetting,
+  ModeId,
+  ModeOptions,
+  NumberFilter,
+  ToneOptions,
+  ToneRange,
+} from '../quiz/types';
 import { OptionGroup, type Option } from './OptionGroup';
 
 const RANGE_DESCRIPTIONS: Record<ToneRange, string> = {
@@ -61,6 +72,11 @@ export function ModeOptionsDialog({ modeId, options, onChange, onClose }: ModeOp
 
         {isIntervalMode(modeId) ? (
           <IntervalPicker value={options[modeId]} onChange={(value) => onChange({ ...options, [modeId]: value })} />
+        ) : modeId === 'degreeToChord' ? (
+          <ChordOptionsPicker
+            value={options.degreeToChord}
+            onChange={(value) => onChange({ ...options, degreeToChord: value })}
+          />
         ) : (
           <ToneOptionsPicker
             value={options[modeId]}
@@ -111,6 +127,85 @@ function IntervalPicker({ value, onChange }: { value: IntervalOptions; onChange:
       </div>
       <p className="setting-help">Pick at least one.</p>
     </section>
+  );
+}
+
+const KEY_OPTIONS: Option<KeySetting>[] = [
+  { value: 'major', label: 'Major' },
+  { value: 'minor', label: 'Minor' },
+  { value: 'both', label: 'Both' },
+];
+
+const MINOR_FORM_OPTIONS: Option<MinorForm>[] = [
+  {
+    value: 'harmonic',
+    label: 'Harmonic minor',
+    description: 'Raised 7th: the dominant is major and the 7th degree is the leading tone.',
+  },
+  {
+    value: 'natural',
+    label: 'Natural minor',
+    description: 'No raised 7th: the dominant is minor and the 7th degree is the subtonic.',
+  },
+];
+
+const SEVENTH_OPTIONS: Option<'triads' | 'sevenths'>[] = [
+  { value: 'triads', label: 'Triads', description: 'Answer with the root and quality.' },
+  {
+    value: 'sevenths',
+    label: 'Seventh chords',
+    description: 'Also answer with the quality of the 7th: major, minor, or diminished.',
+  },
+];
+
+function ChordOptionsPicker({ value, onChange }: { value: ChordOptions; onChange: (value: ChordOptions) => void }) {
+  const selected = new Set(value.degrees);
+
+  function toggle(degree: number) {
+    if (selected.has(degree) && selected.size === 1) return;
+    onChange({ ...value, degrees: DEGREES.filter((other) => (other === degree ? !selected.has(degree) : selected.has(other))) });
+  }
+
+  return (
+    <>
+      <OptionGroup label="Keys" options={KEY_OPTIONS} value={value.keys} onChange={(keys) => onChange({ ...value, keys })} />
+      {value.keys !== 'major' && (
+        <OptionGroup
+          label="Minor scale"
+          options={MINOR_FORM_OPTIONS}
+          value={value.minorForm}
+          onChange={(minorForm) => onChange({ ...value, minorForm })}
+        />
+      )}
+      <OptionGroup
+        label="Chords"
+        options={SEVENTH_OPTIONS}
+        value={value.sevenths ? 'sevenths' : 'triads'}
+        onChange={(kind) => onChange({ ...value, sevenths: kind === 'sevenths' })}
+      />
+      <section className="setting">
+        <div className="setting-head">
+          <h3 className="setting-label">Degrees</h3>
+          <button
+            type="button"
+            className="link-button"
+            disabled={selected.size === DEGREES.length}
+            onClick={() => onChange({ ...value, degrees: [...DEGREES] })}
+          >
+            Select all
+          </button>
+        </div>
+        <div className="checkbox-grid">
+          {DEGREES.map((degree) => (
+            <label className="checkbox" key={degree}>
+              <input type="checkbox" checked={selected.has(degree)} onChange={() => toggle(degree)} />
+              <span className="checkbox-id">{degree}</span>
+              <span className="checkbox-name">{DEGREE_LABELS[degree]}</span>
+            </label>
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
 

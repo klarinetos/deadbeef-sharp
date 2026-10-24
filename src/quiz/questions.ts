@@ -6,15 +6,32 @@ import {
   type Interval,
   type SpelledInterval,
 } from '../theory/intervals';
+import {
+  chordSymbol,
+  degreeName,
+  diatonicChord,
+  isPracticalScale,
+  keyName,
+  scaleOf,
+  type DiatonicChord,
+  type Key,
+  type KeyMode,
+  type SeventhQuality,
+  type TriadQuality,
+} from '../theory/keys';
 import { noteKey, noteName, notesFor, type AccidentalSet, type Naming } from '../theory/notes';
 import { selectedIntervals, toneIntervals } from './modeOptions';
-import type { Choice, ModeId, Question, Rng, Settings } from './types';
+import type { AnswerPart, Choice, ChoiceLayout, ChordOptions, ModeId, Question, Rng, Settings } from './types';
 
 /** The octave number shown for the lower note when notes need octave numbers, as in C4 → E5. */
 const ROOT_OCTAVE = 4;
 
 function pick<T>(items: readonly T[], rng: Rng): T {
   return items[Math.floor(rng() * items.length)];
+}
+
+function singlePart(layout: ChoiceLayout, choices: Choice[], answerKey: string): AnswerPart[] {
+  return [{ id: 'answer', label: 'Answer', layout, choices, answerKey }];
 }
 
 function pickSpelledInterval(
@@ -61,6 +78,77 @@ export function toneChoices(intervals: readonly Interval[]): Choice[] {
   });
 }
 
+const TRIAD_CHOICES: Choice[] = (['major', 'minor', 'diminished', 'augmented'] as TriadQuality[]).map((quality) => ({
+  key: quality,
+  label: quality.charAt(0).toUpperCase() + quality.slice(1),
+  longLabel: quality,
+}));
+
+const SEVENTH_CHOICES: Choice[] = (['major', 'minor', 'diminished'] as SeventhQuality[]).map((quality) => ({
+  key: quality,
+  label: `${quality.charAt(0).toUpperCase() + quality.slice(1)} 7th`,
+  longLabel: `${quality} 7th`,
+}));
+
+interface KeyedChord {
+  key: Key;
+  scale: ReturnType<typeof scaleOf>;
+  chord: DiatonicChord;
+}
+
+/**
+ * Every key and degree the chord options allow, where the key's tonic and the
+ * chord's root are both spellings the accidental setting allows.
+ */
+function chordPool(options: ChordOptions, accidentals: AccidentalSet): KeyedChord[] {
+  const allowed = new Set(notesFor(accidentals).map(noteKey));
+  const modes: KeyMode[] = options.keys === 'both' ? ['major', 'minor'] : [options.keys];
+  return notesFor(accidentals).flatMap((tonic) =>
+    modes.flatMap((mode) => {
+      const key = { tonic, mode };
+      const scale = scaleOf(key, options.minorForm);
+      if (!isPracticalScale(scale)) return [];
+      return options.degrees
+        .map((degree) => ({ key, scale, chord: diatonicChord(scale, degree) }))
+        .filter(({ chord }) => allowed.has(noteKey(chord.root)));
+    }),
+  );
+}
+
+function degreeToChordQuestion(options: ChordOptions, accidentals: AccidentalSet, naming: Naming, rng: Rng): Question {
+  const { key, scale, chord } = pick(chordPool(options, accidentals), rng);
+  const degree = degreeName(chord.degree, scale);
+  const keyText = keyName(key, naming);
+  const chordKind = options.sevenths ? 'seventh chord' : 'triad';
+  const answerWords = [noteName(chord.root, naming), chord.triad];
+  if (options.sevenths) answerWords.push(`${chord.seventh} 7th`);
+
+  const parts: AnswerPart[] = [
+    {
+      id: 'root',
+      label: 'Root',
+      layout: 'note',
+      choices: noteChoices(accidentals, naming),
+      answerKey: noteKey(chord.root),
+    },
+    { id: 'triad', label: 'Quality', layout: 'list', choices: TRIAD_CHOICES, answerKey: chord.triad },
+  ];
+  if (options.sevenths) {
+    parts.push({ id: 'seventh', label: 'Seventh', layout: 'list', choices: SEVENTH_CHOICES, answerKey: chord.seventh });
+  }
+
+  return {
+    modeId: 'degreeToChord',
+    signature: `degreeToChord:${noteKey(key.tonic)}:${key.mode}:${chord.degree}`,
+    title: 'Name the chord',
+    prompt: `${degree} of ${keyText}`,
+    hint: `Name the ${degree.toLowerCase()} ${chordKind} in ${keyText}.`,
+    text: `${degree} ${chordKind} of ${keyText}`,
+    parts,
+    answerLabel: `${answerWords.join(', ')} (${chordSymbol(chord, naming, options.sevenths)})`,
+  };
+}
+
 export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Question {
   const naming: Naming = settings.naming === 'both' ? pick(['letters', 'solfege'], rng) : settings.naming;
   const accidentals: AccidentalSet =
@@ -79,9 +167,7 @@ export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Ques
         prompt: `${interval.name} above ${rootName}`,
         hint: `Which note is a ${interval.name.toLowerCase()} above ${rootName}?`,
         text: `${interval.name} above ${rootName}`,
-        answerType: 'note',
-        choices: noteChoices(accidentals, naming),
-        answerKey: noteKey(upper),
+        parts: singlePart('note', noteChoices(accidentals, naming), noteKey(upper)),
         answerLabel: noteName(upper, naming),
       };
     }
@@ -99,9 +185,7 @@ export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Ques
         prompt: `${rootName} → ${upperName}`,
         hint: `What is the interval from ${rootName} up to ${upperName}?`,
         text: `${rootName} up to ${upperName}: which interval?`,
-        answerType: 'interval',
-        choices: intervalChoices(intervals),
-        answerKey: interval.id,
+        parts: singlePart('interval', intervalChoices(intervals), interval.id),
         answerLabel: `${interval.id} (${interval.name})`,
       };
     }
@@ -122,9 +206,7 @@ export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Ques
         prompt: `${rootName} → ${upperName}`,
         hint: `How many tones is it from ${rootName} up to ${upperName}?`,
         text: `${rootName} up to ${upperName}: how many tones?`,
-        answerType: 'tones',
-        choices: toneChoices(intervals),
-        answerKey: String(interval.semitones),
+        parts: singlePart('tones', toneChoices(intervals), String(interval.semitones)),
         answerLabel: tonesLabel(interval.semitones),
       };
     }
@@ -140,12 +222,13 @@ export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Ques
         prompt: interval.name,
         hint: `How many tones does a ${interval.name.toLowerCase()} span?`,
         text: `${interval.name}: how many tones?`,
-        answerType: 'tones',
-        choices: toneChoices(intervals),
-        answerKey: String(interval.semitones),
+        parts: singlePart('tones', toneChoices(intervals), String(interval.semitones)),
         answerLabel: tonesLabel(interval.semitones),
       };
     }
+
+    case 'degreeToChord':
+      return degreeToChordQuestion(options.degreeToChord, accidentals, naming, rng);
   }
 }
 

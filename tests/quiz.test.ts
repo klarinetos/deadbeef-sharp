@@ -25,17 +25,30 @@ describe('makeQuestion', () => {
   const namings = ['letters', 'solfege', 'both'] as const;
   const accidentalSettings = ['sharps', 'flats', 'both', 'random'] as const;
 
-  it('always offers the correct answer among the choices', () => {
+  it('always offers the correct answer among the choices, in every part', () => {
     const rng = seeded(1);
+    const chordSettings = [
+      DEFAULT_SETTINGS.modeOptions.degreeToChord,
+      { keys: 'both', minorForm: 'harmonic', sevenths: true, degrees: [1, 2, 3, 4, 5, 6, 7] },
+      { keys: 'minor', minorForm: 'natural', sevenths: true, degrees: [1, 2, 3, 4, 5, 6, 7] },
+    ] as const;
     for (const modeId of MODE_IDS) {
       for (const naming of namings) {
         for (const accidentals of accidentalSettings) {
-          const settings = settingsWith({ naming, accidentals });
-          for (let i = 0; i < 50; i++) {
-            const question = makeQuestion(modeId, settings, rng);
-            const keys = question.choices.map((choice) => choice.key);
-            expect(keys).toContain(question.answerKey);
-            expect(new Set(keys).size).toBe(keys.length);
+          for (const degreeToChord of chordSettings) {
+            const settings = settingsWith({
+              naming,
+              accidentals,
+              modeOptions: { ...DEFAULT_SETTINGS.modeOptions, degreeToChord: { ...degreeToChord, degrees: [...degreeToChord.degrees] } },
+            });
+            for (let i = 0; i < 20; i++) {
+              const question = makeQuestion(modeId, settings, rng);
+              for (const part of question.parts) {
+                const keys = part.choices.map((choice) => choice.key);
+                expect(keys).toContain(part.answerKey);
+                expect(new Set(keys).size).toBe(keys.length);
+              }
+            }
           }
         }
       }
@@ -53,7 +66,7 @@ describe('makeQuestion', () => {
         const question = makeQuestion('findNote', settings, rng);
         expect(question.prompt).not.toContain(forbidden);
         expect(question.answerLabel).not.toContain(forbidden);
-        for (const choice of question.choices) expect(choice.label).not.toContain(forbidden);
+        for (const choice of question.parts[0].choices) expect(choice.label).not.toContain(forbidden);
       }
     }
   });
@@ -76,7 +89,7 @@ describe('makeQuestion', () => {
     const rng = seeded(5);
     for (let i = 0; i < 50; i++) {
       const question = makeQuestion('intervalToTones', DEFAULT_SETTINGS, rng);
-      const semitones = Number(question.answerKey);
+      const semitones = Number(question.parts[0].answerKey);
       expect(semitones).toBeGreaterThanOrEqual(1);
       expect(semitones).toBeLessThanOrEqual(12);
     }
@@ -98,7 +111,7 @@ describe('question type options', () => {
       expect(['m3', 'P5']).toContain(makeQuestion('findNote', settings, rng).intervalId);
       const question = makeQuestion('nameInterval', settings, rng);
       expect(['A4', 'd5', 'M7']).toContain(question.intervalId);
-      expect(question.choices.map((choice) => choice.key)).toEqual(['A4', 'd5', 'M7']);
+      expect(question.parts[0].choices.map((choice) => choice.key)).toEqual(['A4', 'd5', 'M7']);
     }
   });
 
@@ -150,8 +163,47 @@ describe('question type options', () => {
   it('offers tone answers up to the largest interval in range', () => {
     const settings = withOptions({ intervalToTones: { range: 'thirteenth', numbers: 'all' } });
     const question = makeQuestion('intervalToTones', settings, seeded(14));
-    expect(question.choices).toHaveLength(21);
-    expect(question.choices.at(-1)?.label).toBe('10½');
+    expect(question.parts[0].choices).toHaveLength(21);
+    expect(question.parts[0].choices.at(-1)?.label).toBe('10½');
+  });
+});
+
+describe('degree to chord questions', () => {
+  function chordSettings(degreeToChord: Partial<Settings['modeOptions']['degreeToChord']>): Settings {
+    return settingsWith({
+      modeOptions: {
+        ...DEFAULT_SETTINGS.modeOptions,
+        degreeToChord: { ...DEFAULT_SETTINGS.modeOptions.degreeToChord, ...degreeToChord },
+      },
+    });
+  }
+
+  it('asks for root and quality, plus the 7th when sevenths are on', () => {
+    const triad = makeQuestion('degreeToChord', chordSettings({ sevenths: false }), seeded(20));
+    expect(triad.parts.map((part) => part.id)).toEqual(['root', 'triad']);
+    const seventh = makeQuestion('degreeToChord', chordSettings({ sevenths: true }), seeded(20));
+    expect(seventh.parts.map((part) => part.id)).toEqual(['root', 'triad', 'seventh']);
+  });
+
+  it('only uses the chosen keys and degrees', () => {
+    const rng = seeded(21);
+    const settings = chordSettings({ keys: 'minor', minorForm: 'natural', degrees: [5, 7] });
+    for (let i = 0; i < 200; i++) {
+      const question = makeQuestion('degreeToChord', settings, rng);
+      expect(question.prompt).toMatch(/^(Dominant|Subtonic) of .+ minor$/);
+      // In natural minor the dominant is a minor chord and the subtonic a major one.
+      const triad = question.parts[1].answerKey;
+      expect(triad).toBe(question.prompt.startsWith('Dominant') ? 'minor' : 'major');
+    }
+  });
+
+  it('gives the full answer with a chord symbol', () => {
+    const rng = seeded(22);
+    const settings = chordSettings({ keys: 'major', sevenths: true, degrees: [5] });
+    for (let i = 0; i < 50; i++) {
+      const question = makeQuestion('degreeToChord', settings, rng);
+      expect(question.answerLabel).toMatch(/^\S+, major, minor 7th \(\S+7\)$/);
+    }
   });
 });
 
@@ -185,11 +237,17 @@ describe('createModePicker', () => {
     const pick = createModePicker(
       settingsWith({
         order: 'weighted',
-        weights: { findNote: 3, nameInterval: 1, notesToTones: 0, intervalToTones: 0 },
+        weights: { findNote: 3, nameInterval: 1, notesToTones: 0, intervalToTones: 0, degreeToChord: 0 },
       }),
       seeded(9),
     );
-    const counts: Record<ModeId, number> = { findNote: 0, nameInterval: 0, notesToTones: 0, intervalToTones: 0 };
+    const counts: Record<ModeId, number> = {
+      findNote: 0,
+      nameInterval: 0,
+      notesToTones: 0,
+      intervalToTones: 0,
+      degreeToChord: 0,
+    };
     for (let i = 0; i < 4000; i++) counts[pick()]++;
     expect(counts.notesToTones).toBe(0);
     expect(counts.intervalToTones).toBe(0);
@@ -228,7 +286,7 @@ describe('settings', () => {
   });
 
   it('blocks starting when every custom odd is zero', () => {
-    const weights = { findNote: 0, nameInterval: 0, notesToTones: 0, intervalToTones: 0 };
+    const weights = { findNote: 0, nameInterval: 0, notesToTones: 0, intervalToTones: 0, degreeToChord: 0 };
     expect(startProblem(settingsWith({ order: 'weighted', weights }))).not.toBeNull();
     expect(startProblem(settingsWith({ order: 'uniform', weights }))).toBeNull();
   });

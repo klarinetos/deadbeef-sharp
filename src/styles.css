@@ -548,6 +548,23 @@ p {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
+.choices-list {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.answer-part {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 .choice {
   display: flex;
   flex-direction: column;
@@ -578,6 +595,13 @@ p {
 .choice-detail {
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+.choice.is-selected,
+.choice.is-selected:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .choice.is-correct {
