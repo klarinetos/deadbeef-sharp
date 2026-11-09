@@ -168,6 +168,26 @@ describe('question type options', () => {
   });
 });
 
+describe('tones to interval questions', () => {
+  it('offers one interval per size, so there is exactly one right answer', () => {
+    const rng = seeded(30);
+    const settings = settingsWith({
+      modeOptions: { ...DEFAULT_SETTINGS.modeOptions, tonesToInterval: { range: 'twoOctaves', numbers: 'all' } },
+    });
+    const offered = new Set<string>();
+    for (let i = 0; i < 300; i++) {
+      const question = makeQuestion('tonesToInterval', settings, rng);
+      const sizes = question.parts[0].choices.map(
+        (choice) => INTERVALS.find((interval) => interval.id === choice.key)!.semitones,
+      );
+      expect(new Set(sizes).size).toBe(sizes.length);
+      for (const choice of question.parts[0].choices) offered.add(choice.key);
+    }
+    // Both spellings of each ambiguous size still turn up across questions.
+    for (const id of ['A4', 'd5', 'A11', 'd12']) expect(offered).toContain(id);
+  });
+});
+
 describe('degree to chord questions', () => {
   function chordSettings(degreeToChord: Partial<Settings['modeOptions']['degreeToChord']>): Settings {
     return settingsWith({
@@ -237,7 +257,7 @@ describe('createModePicker', () => {
     const pick = createModePicker(
       settingsWith({
         order: 'weighted',
-        weights: { findNote: 3, nameInterval: 1, notesToTones: 0, intervalToTones: 0, degreeToChord: 0 },
+        weights: { findNote: 3, nameInterval: 1, notesToTones: 0, intervalToTones: 0, tonesToInterval: 0, degreeToChord: 0 },
       }),
       seeded(9),
     );
@@ -246,6 +266,7 @@ describe('createModePicker', () => {
       nameInterval: 0,
       notesToTones: 0,
       intervalToTones: 0,
+      tonesToInterval: 0,
       degreeToChord: 0,
     };
     for (let i = 0; i < 4000; i++) counts[pick()]++;
@@ -286,7 +307,7 @@ describe('settings', () => {
   });
 
   it('blocks starting when every custom odd is zero', () => {
-    const weights = { findNote: 0, nameInterval: 0, notesToTones: 0, intervalToTones: 0, degreeToChord: 0 };
+    const weights = { findNote: 0, nameInterval: 0, notesToTones: 0, intervalToTones: 0, tonesToInterval: 0, degreeToChord: 0 };
     expect(startProblem(settingsWith({ order: 'weighted', weights }))).not.toBeNull();
     expect(startProblem(settingsWith({ order: 'uniform', weights }))).toBeNull();
   });

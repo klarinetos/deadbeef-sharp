@@ -31,6 +31,7 @@ to spell intervals instantly instead of counting on their fingers.
 | **Name the interval** | Two notes, lower one first | The interval between them | E → B♭ → **d5** |
 | **Notes to tones** | Two notes, lower one first | How many tones apart they are | C → G → **3½ tones** |
 | **Interval to tones** | An interval | How many tones it spans | Minor 3rd → **1½ tones** |
+| **Tones to interval** | A number of tones | The interval that spans it | 3½ tones → **P5** |
 | **Degree to chord** | A key and a scale degree | The chord's root, quality, and optionally its 7th | Dominant of D major → **A, major, minor 7th (A7)** |
 
 Spelling matters. A major 3rd above E is G♯, not A♭, and C → F♯ (A4) is a different interval from
@@ -42,7 +43,7 @@ Each question type has a gear button with its own options:
 
 - **Find the note** and **Name the interval:** tick which intervals to practice, from m2 to M7.
   When naming intervals, only the ticked intervals appear as answers.
-- **Notes to tones** and **Interval to tones:**
+- **Notes to tones**, **Interval to tones**, and **Tones to interval:**
   - **Range:** within an octave, up to a 13th, or within two octaves. Past the octave, notes show
     octave numbers (C4 → E5) so the distance is unambiguous.
   - **Interval numbers:** all, odd only (3rds, 5ths, 7ths, 9ths…), or even only.
@@ -54,7 +55,7 @@ Each question type has a gear button with its own options:
 
 ### Session options
 
-- **Question types:** practice any combination of the five.
+- **Question types:** practice any combination of the six.
 - **Order:** round robin, random with equal odds, or random with custom odds per type.
 - **Length:** 5, 10, 20, or 50 questions, or keep going until you stop.
 - **Note names:** letters (C D E), solfège (Do Re Mi), or a random mix.

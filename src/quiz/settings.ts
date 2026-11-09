@@ -24,7 +24,7 @@ export const MAX_WEIGHT = 10;
 export const DEFAULT_SETTINGS: Settings = {
   modes: [...MODE_IDS],
   order: 'uniform',
-  weights: { findNote: 1, nameInterval: 1, notesToTones: 1, intervalToTones: 1, degreeToChord: 1 },
+  weights: { findNote: 1, nameInterval: 1, notesToTones: 1, intervalToTones: 1, tonesToInterval: 1, degreeToChord: 1 },
   count: 10,
   naming: 'letters',
   accidentals: 'both',
@@ -76,6 +76,7 @@ function sanitizeModeOptions(raw: unknown): ModeOptions {
     nameInterval: sanitizeIntervalOptions(input.nameInterval, DEFAULT_MODE_OPTIONS.nameInterval),
     notesToTones: sanitizeToneOptions(input.notesToTones, DEFAULT_MODE_OPTIONS.notesToTones),
     intervalToTones: sanitizeToneOptions(input.intervalToTones, DEFAULT_MODE_OPTIONS.intervalToTones),
+    tonesToInterval: sanitizeToneOptions(input.tonesToInterval, DEFAULT_MODE_OPTIONS.tonesToInterval),
     degreeToChord: sanitizeChordOptions(input.degreeToChord, DEFAULT_MODE_OPTIONS.degreeToChord),
   };
 }

@@ -2,7 +2,13 @@ import type { IntervalId, SimpleIntervalId } from '../theory/intervals';
 import type { MinorForm } from '../theory/keys';
 import type { AccidentalSet, Naming } from '../theory/notes';
 
-export type ModeId = 'findNote' | 'nameInterval' | 'notesToTones' | 'intervalToTones' | 'degreeToChord';
+export type ModeId =
+  | 'findNote'
+  | 'nameInterval'
+  | 'notesToTones'
+  | 'intervalToTones'
+  | 'tonesToInterval'
+  | 'degreeToChord';
 
 /** How the next question type is chosen. */
 export type Order = 'roundRobin' | 'uniform' | 'weighted';
@@ -49,6 +55,7 @@ export interface ModeOptions {
   nameInterval: IntervalOptions;
   notesToTones: ToneOptions;
   intervalToTones: ToneOptions;
+  tonesToInterval: ToneOptions;
   degreeToChord: ChordOptions;
 }
 

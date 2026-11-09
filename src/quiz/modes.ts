@@ -28,6 +28,11 @@ export const MODES: readonly Mode[] = [
     description: 'Given an interval, say how many tones it spans.',
   },
   {
+    id: 'tonesToInterval',
+    title: 'Tones to interval',
+    description: 'Given a number of tones, name the interval that spans it.',
+  },
+  {
     id: 'degreeToChord',
     title: 'Degree to chord',
     description: 'Given a key and a degree, such as the dominant of D major, name the chord.',

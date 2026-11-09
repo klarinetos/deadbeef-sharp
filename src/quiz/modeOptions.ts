@@ -46,6 +46,7 @@ export const DEFAULT_MODE_OPTIONS: ModeOptions = {
   nameInterval: { intervals: SIMPLE_INTERVALS.map((interval) => interval.id) },
   notesToTones: { range: 'octave', numbers: 'all' },
   intervalToTones: { range: 'octave', numbers: 'all' },
+  tonesToInterval: { range: 'octave', numbers: 'all' },
   degreeToChord: { keys: 'major', minorForm: 'harmonic', sevenths: false, degrees: [...DEGREES] },
 };
 

@@ -227,6 +227,28 @@ export function makeQuestion(modeId: ModeId, settings: Settings, rng: Rng): Ques
       };
     }
 
+    case 'tonesToInterval': {
+      // Some sizes have two spellings, such as A4 and d5 for 3 tones. Offer one of them,
+      // picked at random, so every question has exactly one right button.
+      const sizes = [...new Set(toneIntervals(options.tonesToInterval).map((interval) => interval.semitones))];
+      const intervals = sizes.map((size) =>
+        pick(toneIntervals(options.tonesToInterval).filter((interval) => interval.semitones === size), rng),
+      );
+      const interval = pick(intervals, rng);
+      const tones = tonesLabel(interval.semitones);
+      return {
+        modeId,
+        intervalId: interval.id,
+        signature: `${modeId}:${interval.semitones}`,
+        title: 'Name the interval',
+        prompt: tones,
+        hint: `Which interval spans ${tones}?`,
+        text: `${tones}: which interval?`,
+        parts: singlePart('interval', intervalChoices(intervals), interval.id),
+        answerLabel: `${interval.id} (${interval.name})`,
+      };
+    }
+
     case 'degreeToChord':
       return degreeToChordQuestion(options.degreeToChord, accidentals, naming, rng);
   }
