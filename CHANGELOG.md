@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for the theory and quiz logic.
 - Initial repository structure, README, license, and contribution guidelines.
 
+### Changed
+
+- You can now untick every question type on the settings screen, which makes it easier to pick exactly
+  the ones you want. Start stays disabled until at least one is ticked.
+
 ### Removed
 
 - The octave is no longer asked about in any question type.

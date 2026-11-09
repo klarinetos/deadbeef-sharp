@@ -280,7 +280,8 @@ describe('settings', () => {
   it('falls back to defaults for missing or invalid values', () => {
     expect(sanitizeSettings(null)).toEqual(DEFAULT_SETTINGS);
     const settings = sanitizeSettings({ modes: ['nope'], count: 7, naming: 'letters', weights: { findNote: -1 } });
-    expect(settings.modes).toEqual(DEFAULT_SETTINGS.modes);
+    expect(settings.modes).toEqual([]);
+    expect(sanitizeSettings({}).modes).toEqual(DEFAULT_SETTINGS.modes);
     expect(settings.count).toBe(DEFAULT_SETTINGS.count);
     expect(settings.weights.findNote).toBe(DEFAULT_SETTINGS.weights.findNote);
   });
@@ -304,6 +305,12 @@ describe('settings', () => {
     expect(settings.modes).toEqual(['notesToTones']);
     expect(settings.count).toBe('infinite');
     expect(settings.accidentals).toBe('random');
+  });
+
+  it('allows no question types to be selected, but blocks starting', () => {
+    const settings = sanitizeSettings({ modes: [] });
+    expect(settings.modes).toEqual([]);
+    expect(startProblem(settings)).not.toBeNull();
   });
 
   it('blocks starting when every custom odd is zero', () => {

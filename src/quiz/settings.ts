@@ -85,9 +85,10 @@ function sanitizeModeOptions(raw: unknown): ModeOptions {
 export function sanitizeSettings(raw: unknown): Settings {
   const input = asRecord(raw) as Partial<Record<keyof Settings, unknown>>;
 
+  // An empty list is kept: nothing selected is a valid state, it just can't be started.
   const modes = Array.isArray(input.modes)
     ? MODE_IDS.filter((id) => (input.modes as unknown[]).includes(id))
-    : [];
+    : [...DEFAULT_SETTINGS.modes];
 
   const rawWeights = asRecord(input.weights);
   const weights = Object.fromEntries(
@@ -99,7 +100,7 @@ export function sanitizeSettings(raw: unknown): Settings {
   ) as Record<ModeId, number>;
 
   return {
-    modes: modes.length > 0 ? modes : [...DEFAULT_SETTINGS.modes],
+    modes,
     order: oneOf(ORDERS, input.order, DEFAULT_SETTINGS.order),
     weights,
     count: oneOf(COUNTS, input.count, DEFAULT_SETTINGS.count),

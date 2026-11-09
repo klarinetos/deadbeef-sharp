@@ -61,7 +61,6 @@ export function SettingsScreen({ settings, onChange, onStart }: SettingsScreenPr
 
   function toggleMode(id: ModeId) {
     const selected = settings.modes.includes(id);
-    if (selected && settings.modes.length === 1) return;
     const modes = selected
       ? settings.modes.filter((mode) => mode !== id)
       : MODE_IDS.filter((mode) => mode === id || settings.modes.includes(mode));
