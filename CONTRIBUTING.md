@@ -24,6 +24,12 @@ proposing a solution. Music-theory corrections are especially welcome.
 4. Update the documentation and `CHANGELOG.md` if your change affects users.
 5. Open the pull request and fill in the template.
 
+## Rights in your contributions
+
+DEADBEEF♯ is not open source. By submitting a pull request or any other contribution, you grant the
+copyright holder a perpetual, irrevocable license to use, modify, distribute, and relicense your
+contribution as part of this project. See [LICENSE](LICENSE) for the full terms.
+
 ## Commit messages
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/):
