@@ -84,7 +84,9 @@ p {
 .app {
   max-width: 720px;
   margin: 0 auto;
-  padding: 24px 16px 64px;
+  /* The safe-area insets keep content clear of phone notches and system bars; they're 0 elsewhere. */
+  padding: calc(24px + env(safe-area-inset-top, 0px)) calc(16px + env(safe-area-inset-right, 0px))
+    calc(64px + env(safe-area-inset-bottom, 0px)) calc(16px + env(safe-area-inset-left, 0px));
 }
 
 .app-header {

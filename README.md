@@ -87,6 +87,20 @@ Then open http://localhost:5173.
 | `npm run build` | Builds the production site into `dist/` |
 | `npm run preview` | Serves the production build locally |
 
+### Android
+
+The Android app is built with [Capacitor](https://capacitorjs.com/), which wraps the web app in a native
+shell. Every push to `main` builds a debug APK on GitHub Actions: open the latest **Android build** run on
+the [Actions](../../actions) tab and download `deadbeef-sharp-debug-apk`.
+
+To build locally instead, install [Android Studio](https://developer.android.com/studio) and JDK 21, then:
+
+```bash
+npm run build
+npx cap sync android
+npx cap open android
+```
+
 Built with [React](https://react.dev/), [TypeScript](https://www.typescriptlang.org/),
 [Vite](https://vite.dev/), and [Vitest](https://vitest.dev/).
 

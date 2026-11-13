@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Android app, built with Capacitor, with its own icon and launch screen. GitHub Actions builds a debug APK
+  on every push to `main`.
 - Tones to interval question type: given a number of tones, name the interval. When two intervals share a
   size (A4 and d5), only one of them, picked at random, is offered as an answer.
 - Degree to chord question type: given a key and a scale degree (tonic, supertonic, and so on), name the
