@@ -90,8 +90,11 @@ Then open http://localhost:5173.
 ### Android
 
 The Android app is built with [Capacitor](https://capacitorjs.com/), which wraps the web app in a native
-shell. Every push to `main` builds a debug APK on GitHub Actions: open the latest **Android build** run on
-the [Actions](../../actions) tab and download `deadbeef-sharp-debug-apk`.
+shell. Download the APK from the latest [release](../../releases/latest) and open it on your phone; Android
+will ask you to allow installing apps from your browser or file manager.
+
+To publish a release, bump `version` in `package.json`, move the changelog's Unreleased notes under the new
+version, then push a matching tag such as `v0.2.0`. GitHub Actions builds the APK and creates the release.
 
 To build locally instead, install [Android Studio](https://developer.android.com/studio) and JDK 21, then:
 
